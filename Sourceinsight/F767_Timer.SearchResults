@@ -1,0 +1,9 @@
+---- OscillatorType Matches (8 in 3 files) ----
+main.c (C:\st_workspace\stm32_F767\Src):  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+stm32f7xx_hal_rcc.c (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Src):  assert_param(IS_RCC_OSCILLATORTYPE(RCC_OscInitStruct->OscillatorType));
+stm32f7xx_hal_rcc.c (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Src):  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_HSE) == RCC_OSCILLATORTYPE_HSE)
+stm32f7xx_hal_rcc.c (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Src):  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_HSI) == RCC_OSCILLATORTYPE_HSI)
+stm32f7xx_hal_rcc.c (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Src):  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_LSI) == RCC_OSCILLATORTYPE_LSI)
+stm32f7xx_hal_rcc.c (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Src):  if(((RCC_OscInitStruct->OscillatorType) & RCC_OSCILLATORTYPE_LSE) == RCC_OSCILLATORTYPE_LSE)
+stm32f7xx_hal_rcc.c (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Src):  RCC_OscInitStruct->OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_LSI;
+stm32f7xx_hal_rcc.h (C:\st_workspace\stm32_F767\Drivers\STM32F7xx_HAL_Driver\Inc):  uint32_t OscillatorType;       /*!< The oscillators to be configured.

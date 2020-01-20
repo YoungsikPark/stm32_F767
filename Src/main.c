@@ -65,7 +65,7 @@ int fputc(int c,FILE*stream)
     uint32_t mytime =0;
     int itval = 0;
     uint8_t pintoggle = 0;
-    uint32_t intime =0;
+    int intime =0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
