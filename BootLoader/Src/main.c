@@ -177,8 +177,6 @@ int main(void)
 #endif ...? 확인 필요.
 */
 	printf("start MCU\r\n");
-	//HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1); //처음에 인터럽트가 강재로 시작되지않으면 읽히지 않음. y-modem도 그런지 확인필요
-	                                                      //기존 소스는 어떤식으로 ymodem 설정했는지 확인도 필요함.
 	 pre_time = millis();
 
 	  while(1)
@@ -188,12 +186,8 @@ int main(void)
 			  pre_time = millis();
 			  HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		  }
-//		  rx_data = uartRead(2);
-		//  HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1);
-		//  printf("uart Rx : %c %x \r\n",rx_data, rx_data);
 
-
-	  if(uartAvailable(2)>0)
+		  if(uartAvailable(2)>0)
 		  {
 			  uint8_t rx_data2;
 

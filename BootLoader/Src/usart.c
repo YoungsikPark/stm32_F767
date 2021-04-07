@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
 #include "qbuffer.h"
+#include "stm32f7xx_hal_def.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -29,9 +30,9 @@
 
 static bool is_open[4];
 
-static qbuffer_t qbuffer;
+static qbuffer_t qbuffer[4];
 static uint8_t rx_buf[256];
-static uint8_t rx_data;
+//static uint8_t rx_data;
 
 UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart3_rx;
@@ -49,8 +50,8 @@ uint32_t uartAvailable(uint8_t ch)
       break;
 
     case 2:
-     // qbuffer[ch].in = (qbuffer[ch].len - hdma_usart3_rx.Instance->CNDTR);
-      ret = qbufferAvailable(&qbuffer);
+     qbuffer[ch].in = (qbuffer[ch].len - hdma_usart3_rx.Instance->NDTR);
+     ret = qbufferAvailable(&qbuffer[ch]); //인터럽트 사용시
        break;
   }
 
@@ -68,7 +69,7 @@ uint8_t uartRead(uint8_t ch)
       break;
 
     case 2:
-      qbufferRead(&qbuffer, &ret, 1);
+      qbufferRead(&qbuffer[ch], &ret, 1);
       break;
   }
   return ret;
@@ -89,7 +90,13 @@ void MX_USART3_UART_Init(void)
   huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
 
-  qbufferCreate(&qbuffer, &rx_buf[2], 256);
+  HAL_UART_DeInit(&huart3);
+
+  qbufferCreate(&qbuffer[2], &rx_buf[0], 256);
+
+   __HAL_RCC_DMA1_CLK_ENABLE();
+   HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
+   HAL_NVIC_EnableIRQ(USART3_IRQn);
 
   if (HAL_UART_Init(&huart3) != HAL_OK)
   {
@@ -99,11 +106,14 @@ void MX_USART3_UART_Init(void)
   {
 	  ret = true;
 	  is_open[2]=true;
-	  if(HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1) != HAL_OK)
+	//if(HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1) != HAL_OK)
+	   if(HAL_UART_Receive_DMA(&huart3, (uint8_t *)&rx_buf[0], 256) != HAL_OK)
 	  {
 		  printf("HAL_ERROR\r\n");
-		  Error_Handler();
+		  ret = false;
 	  }
+		qbuffer[2].in  = qbuffer[2].len - hdma_usart3_rx.Instance->NDTR;
+		qbuffer[2].out = qbuffer[2].in;
   }
 
 }
@@ -199,7 +209,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-#if 1
+#if 0
   if (huart->Instance == USART3)
   {
 	HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
