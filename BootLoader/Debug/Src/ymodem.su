@@ -1,0 +1,9 @@
+ymodem.c:67:6:ymodemInit	4	static
+ymodem.c:76:6:ymodemOpen	24	static
+ymodem.c:96:6:ymodemPutch	24	static
+ymodem.c:105:6:ymodemGetFileInfo	32	static
+ymodem.c:140:6:ymodemAck	16	static
+ymodem.c:158:6:ymodemReceive	24	static
+ymodem.c:300:6:ymodemReceivePacket	24	static
+ymodem.c:384:10:crc_update	24	static
+ymodem.c:402:10:crc16	24	static

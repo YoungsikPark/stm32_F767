@@ -40,7 +40,7 @@ extern bool     qbufferWrite(qbuffer_t *p_node, uint8_t *p_data, uint32_t length
 bool     qbufferRead(qbuffer_t *p_node, uint8_t *p_data, uint32_t length);
 uint32_t qbufferAvailable(qbuffer_t *p_node);
 void     qbufferFlush(qbuffer_t *p_node);
-extern qbuffer_t;
+//extern  qbuffer_t;
 
 #ifdef __cplusplus
 }

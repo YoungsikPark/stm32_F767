@@ -19,6 +19,7 @@
 
 //#include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <main.h>
 #include "usart.h"
 //#include "gpio.h"
@@ -26,12 +27,18 @@
 
 UART_HandleTypeDef huart3;
 
+int __io_putchar(int ch)
+{
+  uartWrite(2, (uint8_t *)&ch, 1);
+  return 1;
+}
+/*
 int _write(int file,uint8_t*ptr,int len)
 {
   HAL_UART_Transmit_IT(&huart3,ptr,len);
   return len;
 }
-
+*/
 
 void SystemClock_config(void);
 
@@ -157,10 +164,8 @@ void Error_Handler(void)
   __disable_irq();
 }
 
-
 int main(void)
 {
-	uint8_t rx_data;
 	uint32_t pre_time;
 
 
@@ -170,6 +175,7 @@ int main(void)
 	//SystemInit();
 	MX_GPIO_Init();
 	MX_USART3_UART_Init();
+	flashInit();
 
 /*
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -189,11 +195,55 @@ int main(void)
 
 		  if(uartAvailable(2)>0)
 		  {
-			  uint8_t rx_data2;
+			  uint8_t rx_data;
 
-			  rx_data2 = uartRead(2);
-			  printf("uart Rx : %c %x \r\n",rx_data2, rx_data2);
+			  rx_data = uartRead(2);
+			  printf("uart Rx : %c %x \r\n",rx_data, rx_data);
+
+			  if(rx_data == '1')
+			  {
+				  uint8_t buf[32];
+
+				  printf("Read....\r\n");
+				  flashRead(0x08000000+(60*1024),buf,32);
+				  for(int i=0; i<32; i++)
+				  {
+					 printf("0x0%X : 0x%X\r\n",0x08000000+(60*1024)+i,buf[i]);
+				  }
+			  }
+
+			  if(rx_data == '2')
+			  {
+				  printf("Erase.......");
+
+				  if(flashErase(0x08000000+(60*1024),32) == true){
+					  printf("Ok!!\r\n");
+				  }
+				  else
+				  {
+					  printf("Fail\r\n");
+				  }
+			   }
+
+			  if(rx_data == '3')
+			  {
+				  uint8_t buf[32];
+				  for(int i=0; i<32; i++)
+				  {
+					 buf[i]=i;
+				  }
+				  printf("Write...\r\n");
+				  if(flashWrite(0x08000000+(60*1024),32) == true){
+					  printf("Ok!!\r\n");
+				  }
+				  else
+				  {
+					  printf("Fail\r\n");
+				  }
+
+			  }
 		  }
+
 
 	  }
 

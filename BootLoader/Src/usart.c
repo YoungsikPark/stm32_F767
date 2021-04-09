@@ -75,9 +75,32 @@ uint8_t uartRead(uint8_t ch)
   return ret;
 }
 
+uint32_t uartWrite(uint8_t ch, uint8_t *p_data, uint32_t length)
+{
+  uint32_t ret = 0;
+  HAL_StatusTypeDef status;
+
+  switch(ch)
+  {
+    case 1:
+    //  ret = cdcWrite(p_data, length);
+      break;
+
+    case 2:
+      status = HAL_UART_Transmit(&huart3, p_data, length, 100);
+      if (status == HAL_OK)
+      {
+        ret = length;
+      }
+
+      break;
+  }
+
+  return ret;
+}
 void MX_USART3_UART_Init(void)
 {
-  bool ret = false;
+  //bool ret = false;
 
   huart3.Instance = USART3;
   huart3.Init.BaudRate = 115200;
@@ -104,13 +127,13 @@ void MX_USART3_UART_Init(void)
   }
   else
   {
-	  ret = true;
+	 // ret = true;
 	  is_open[2]=true;
 	//if(HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1) != HAL_OK)
 	   if(HAL_UART_Receive_DMA(&huart3, (uint8_t *)&rx_buf[0], 256) != HAL_OK)
 	  {
 		  printf("HAL_ERROR\r\n");
-		  ret = false;
+		 // ret = false;
 	  }
 		qbuffer[2].in  = qbuffer[2].len - hdma_usart3_rx.Instance->NDTR;
 		qbuffer[2].out = qbuffer[2].in;

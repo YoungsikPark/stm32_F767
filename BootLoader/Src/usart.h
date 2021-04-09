@@ -39,6 +39,10 @@ extern UART_HandleTypeDef huart3;
 
 void MX_USART3_UART_Init(void);
 extern void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+
+extern uint32_t uartAvailable(uint8_t ch);
+extern uint32_t uartWrite(uint8_t ch, uint8_t *p_data, uint32_t length);
+extern uint8_t uartRead(uint8_t ch);
 /* USER CODE BEGIN Prototypes */
 
 /* USER CODE END Prototypes */

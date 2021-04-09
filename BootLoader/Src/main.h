@@ -18,8 +18,8 @@
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 void SystemClock_config(void);
-void delay(uint32_t ms);
-uint32_t mills(void);
+extern void delay(uint32_t ms);
+extern uint32_t millis(void);
 void MX_GPIO_Init(void);
 
 
