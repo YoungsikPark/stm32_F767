@@ -1,8 +1,9 @@
 usart.c:42:10:uartAvailable	24	static
 usart.c:61:9:uartRead	24	static
 usart.c:78:10:uartWrite	32	static
-usart.c:101:6:MX_USART3_UART_Init	16	static
-usart.c:144:6:HAL_UART_MspInit	48	static
-usart.c:196:6:HAL_UART_MspDeInit	16	static
-usart.c:225:6:HAL_UART_ErrorCallback	16	static
-usart.c:233:6:HAL_UART_RxCpltCallback	16	static
+usart.c:102:10:uartPrintf	292	static
+usart.c:119:6:MX_USART3_UART_Init	16	static
+usart.c:163:6:HAL_UART_MspInit	48	static
+usart.c:215:6:HAL_UART_MspDeInit	16	static
+usart.c:244:6:HAL_UART_ErrorCallback	16	static
+usart.c:252:6:HAL_UART_RxCpltCallback	16	static

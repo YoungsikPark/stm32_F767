@@ -10,11 +10,18 @@
 
 //#include "hw_def.h"
 
+#include <stdbool.h>
+#include <stdio.h>
+#include "ymodem.h"
+
+#define _USE_HW_CLI
+#define HW_CLI_LINE_HIS_MAX 4
+#define HW_CLI_LINE_BUF_MAX 64
 
 #ifdef _USE_HW_CLI
 
-#define CLI_CMD_LIST_MAX      3//HW_CLI_CMD_LIST_MAX
-#define CLI_CMD_NAME_MAX      3//HW_CLI_CMD_NAME_MAX
+#define CLI_CMD_LIST_MAX      16//HW_CLI_CMD_LIST_MAX
+#define CLI_CMD_NAME_MAX      16//HW_CLI_CMD_NAME_MAX
 
 #define CLI_LINE_HIS_MAX      HW_CLI_LINE_HIS_MAX
 #define CLI_LINE_BUF_MAX      HW_CLI_LINE_BUF_MAX

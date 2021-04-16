@@ -1,4 +1,5 @@
-Src/cli.o: ../Src/cli.c ../Src/cli.h ../Src/usart.h ../Src/main.h \
+Src/cli.o: ../Src/cli.c ../Src/cli.h ../Src/ymodem.h ../Src/usart.h \
+ ../Src/main.h \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/BSP/stm32f7xx_hal_conf.h \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_rcc.h \
@@ -30,6 +31,8 @@ Src/cli.o: ../Src/cli.c ../Src/cli.h ../Src/usart.h ../Src/main.h \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h
 
 ../Src/cli.h:
+
+../Src/ymodem.h:
 
 ../Src/usart.h:
 

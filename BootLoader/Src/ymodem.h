@@ -81,7 +81,6 @@ bool ymodemInit(void);
 bool ymodemOpen(ymodem_t *p_modem, uint8_t ch);
 bool ymodemReceive(ymodem_t *p_modem);
 bool ymodemAck(ymodem_t *p_modem);
-
 #endif
 
 #endif /* SRC_COMMON_HW_INCLUDE_YMODEM_H_ */

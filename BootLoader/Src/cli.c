@@ -9,8 +9,11 @@
 
 #include "cli.h"
 #include "usart.h"
-
-
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include "ymodem.h"
 #ifdef _USE_HW_CLI
 
 
@@ -130,6 +133,8 @@ bool cliInit(void)
 
   cliAdd("help", cliShowList);
   cliAdd("md"  , cliMemoryDump);
+//  cliAdd("down", cliYmodem);
+  cliOpen(2,115200);
 
   return true;
 }
@@ -139,8 +144,8 @@ bool cliOpen(uint8_t ch, uint32_t baud)
   cli_node.ch = ch;
   cli_node.baud = baud;
 
-  cli_node.is_open = uartOpen(ch, baud);
-
+  //cli_node.is_open = uartOpen(ch, baud);
+  cli_node.is_open = 1;
   return cli_node.is_open;
 }
 
@@ -165,7 +170,7 @@ bool cliLogClose(void)
   cli_node.is_log = false;
   return true;
 }
-
+/*
 void cliShowLog(cli_t *p_cli)
 {
   if (cli_node.is_log == true)
@@ -185,11 +190,12 @@ void cliShowLog(cli_t *p_cli)
     uartPrintf(p_cli->log_ch, "\n");
   }
 }
-
+*/
 void cliShowPrompt(cli_t *p_cli)
 {
   uartPrintf(p_cli->ch, "\n\r");
   uartPrintf(p_cli->ch, CLI_PROMPT_STR);
+
 }
 
 bool cliMain(void)
@@ -199,7 +205,7 @@ bool cliMain(void)
     return false;
   }
 
-  if (uartAvailable(cli_node.ch) > 0)
+  if (uartAvailable(2) > 0)
   {
     cliUpdate(&cli_node, uartRead(cli_node.ch));
   }
@@ -214,12 +220,12 @@ uint32_t cliAvailable(void)
 
 uint8_t cliRead(void)
 {
-  return uartRead(cli_node.ch);
+  return uartRead(2);
 }
 
 uint32_t cliWrite(uint8_t *p_data, uint32_t length)
 {
-  return uartWrite(cli_node.ch, p_data, length);
+  return uartWrite(2, p_data, length);
 }
 
 bool cliUpdate(cli_t *p_cli, uint8_t rx_data)
@@ -235,8 +241,6 @@ bool cliUpdate(cli_t *p_cli, uint8_t rx_data)
   {
     switch(rx_data)
     {
-      // 엔터
-      //
       case CLI_KEY_ENTER:
         if (line->count > 0)
         {
@@ -249,15 +253,9 @@ bool cliUpdate(cli_t *p_cli, uint8_t rx_data)
         line->buf[0] = 0;
         cliShowPrompt(p_cli);
         break;
-
-
       case CLI_KEY_ESC:
         p_cli->state = CLI_RX_SP1;
         break;
-
-
-      // DEL
-      //
       case CLI_KEY_DEL:
         if (line->cursor < line->count)
         {
@@ -275,10 +273,6 @@ bool cliUpdate(cli_t *p_cli, uint8_t rx_data)
           uartPrintf(p_cli->ch, "\x1B[1P");
         }
         break;
-
-
-      // 백스페이스
-      //
       case CLI_KEY_BACK:
         if (line->count > 0 && line->cursor > 0)
         {
@@ -310,8 +304,6 @@ bool cliUpdate(cli_t *p_cli, uint8_t rx_data)
           uartPrintf(p_cli->ch, "\b \b\x1B[1P");
         }
         break;
-
-
       default:
         if ((line->count + 1) < line->buf_len)
         {
@@ -429,7 +421,7 @@ bool cliUpdate(cli_t *p_cli, uint8_t rx_data)
 
 
 
-  cliShowLog(p_cli);
+//  cliShowLog(p_cli);
 
   return ret;
 }
@@ -708,16 +700,16 @@ void cliShowList(cli_args_t *args)
   cli_t *p_cli = &cli_node;
 
 
-  cliPrintf("\r\n");
-  cliPrintf("---------- cmd list ---------\r\n");
+  printf("\r\n");
+  printf("---------- cmd list ---------\r\n");
 
   for (int i=0; i<p_cli->cmd_count; i++)
   {
-    cliPrintf(p_cli->cmd_list[i].cmd_str);
-    cliPrintf("\r\n");
+    printf(p_cli->cmd_list[i].cmd_str);
+    printf("\r\n");
   }
 
-  cliPrintf("-----------------------------\r\n");
+  printf("-----------------------------\r\n");
 }
 
 void cliMemoryDump(cli_args_t *args)
@@ -730,7 +722,6 @@ void cliMemoryDump(cli_args_t *args)
 
   int    argc = args->argc;
   char **argv = args->argv;
-
 
   if(args->argc < 1)
   {
@@ -745,38 +736,40 @@ void cliMemoryDump(cli_args_t *args)
   addr   = (unsigned int *)strtoul((const char * ) argv[0], (char **)NULL, (int) 0);
   ascptr = (unsigned int *)addr;
 
-  cliPrintf("\n   ");
+  cliPrintf("\r\n");
   for (idx = 0; idx<size; idx++)
   {
     if((idx%4) == 0)
     {
-      cliPrintf(" 0x%08X: ", (unsigned int)addr);
+      printf("   0x%08X: ", (unsigned int)addr);
     }
-    cliPrintf(" 0x%08X", *(addr));
+    printf(" 0x%08X", *(addr));
 
     if ((idx%4) == 3)
     {
-      cliPrintf ("  |");
       for (idx1= 0; idx1< 4; idx1++)
       {
         memcpy((char *)asc, (char *)ascptr, 4);
+		if(idx1 == 0)
+		{
+	       printf("  |");
+		}
         for (i=0;i<4;i++)
         {
-          if (asc[i] > 0x1f && asc[i] < 0x7f)
+           if (asc[i] > 0x1f && asc[i] < 0x7f)
           {
-            cliPrintf("%c", asc[i]);
+            printf("%c", asc[i]);
           }
           else
           {
-            cliPrintf(".");
+            printf(".");
           }
         }
         ascptr+=1;
       }
-      cliPrintf("|\n   ");
+      printf("|\r\n");
     }
     addr++;
   }
 }
-
 #endif

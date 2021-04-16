@@ -1,5 +1,11 @@
-flash.c:48:6:flashInit	16	static
-flash.c:59:6:flashErase	56	static
-flash.c:105:6:flashWrite	40	static
-flash.c:138:6:flashRead	40	static
-flash.c:152:6:flashInSector	48	static
+flash.c:62:6:flashInit	16	static
+flash.c:75:6:flashErase	40	static
+flash.c:157:6:flashWrite	40	static
+flash.c:190:6:flashRead	40	static
+flash.c:206:19:ReadFlash	16	static
+flash.c:228:10:GetWriteProtect	48	static
+flash.c:238:19:EnableWriteProtect	40	static
+flash.c:262:19:DisableWriteProtect	40	static
+flash.c:287:6:flashInSector	48	static
+flash.c:328:17:GetSector	24	static
+flash.c:441:6:cliFlash	56	static

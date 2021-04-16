@@ -201,8 +201,8 @@ bool ymodemReceive(ymodem_t *p_modem)
           p_modem->file_addr = 0;
           ymodemGetFileInfo(p_modem);
 
-          //ymodemPutch(p_modem, YMODEM_ACK);
-          //ymodemPutch(p_modem, YMODEM_C);
+          ymodemPutch(p_modem, YMODEM_ACK);
+          ymodemPutch(p_modem, YMODEM_C);
           p_modem->ack_mode = YMODEM_RESP_ACK_C;
 
           p_modem->state = YMODEM_STATE_WAIT_FIRST;
@@ -254,7 +254,7 @@ bool ymodemReceive(ymodem_t *p_modem)
           p_modem->file_addr += buf_length;
           p_modem->file_received += buf_length;
 
-          //ymodemPutch(p_modem, YMODEM_ACK);
+          ymodemPutch(p_modem, YMODEM_ACK);
           p_modem->ack_mode = YMODEM_RESP_ACK;
           p_modem->type = YMODEM_TYPE_DATA;
           ret = true;
@@ -420,18 +420,18 @@ uint16_t crc16(uint8_t *data, uint16_t size)
 }
 
 
-#ifdef _USE_HW_CLI
+#if 1
 void cliYmodem(cli_args_t *args)
 {
   bool ret = false;
   ymodem_t ymodem;
   bool keep_loop;
-  uint8_t log_ch = _DEF_UART2;
+  uint8_t log_ch = 1;
 
 
   if (args->argc == 1 && args->isStr(0, "down"))
   {
-    ymodemOpen(&ymodem, _DEF_UART1);
+    ymodemOpen(&ymodem, 2);
 
     keep_loop = true;
 

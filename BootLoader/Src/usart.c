@@ -98,6 +98,24 @@ uint32_t uartWrite(uint8_t ch, uint8_t *p_data, uint32_t length)
 
   return ret;
 }
+
+uint32_t uartPrintf(uint8_t ch, char *fmt, ...)
+{
+  char buf[256];
+  va_list args;
+  int len;
+  uint32_t ret;
+
+  va_start(args, fmt);
+  len = vsnprintf(buf, 256, fmt, args);
+
+  ret = uartWrite(ch, (uint8_t *)buf, len);
+
+  va_end(args);
+
+
+  return ret;
+}
 void MX_USART3_UART_Init(void)
 {
   //bool ret = false;
@@ -139,6 +157,7 @@ void MX_USART3_UART_Init(void)
 		qbuffer[2].out = qbuffer[2].in;
   }
 
+  cliInit();
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)

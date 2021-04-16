@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <main.h>
 #include "usart.h"
+#include "core_cm7.h"
+#include "ymodem.h"
 //#include "gpio.h"
 
 
@@ -39,6 +41,7 @@ int _write(int file,uint8_t*ptr,int len)
   return len;
 }
 */
+static void CPU_CACHE_Enable(void);
 
 void SystemClock_config(void);
 
@@ -143,6 +146,14 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void CPU_CACHE_Enable(void)
+{
+  /* Enable I-Cache */
+  SCB_EnableICache();
+
+  /* Enable D-Cache */
+  SCB_EnableDCache();
+}
 
 /* USER CODE END 4 */
 
@@ -167,7 +178,9 @@ void Error_Handler(void)
 int main(void)
 {
 	uint32_t pre_time;
+	uint32_t k=16;
 
+	CPU_CACHE_Enable();
 
 	HAL_Init();
 	SystemClock_Config();
@@ -176,7 +189,8 @@ int main(void)
 	MX_GPIO_Init();
 	MX_USART3_UART_Init();
 	flashInit();
-
+	ymodemInit();
+	cliFlash();
 /*
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -193,22 +207,27 @@ int main(void)
 			  HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		  }
 
+		  cliMain();
+
+		  /*
 		  if(uartAvailable(2)>0)
 		  {
 			  uint8_t rx_data;
 
 			  rx_data = uartRead(2);
-			  printf("uart Rx : %c %x \r\n",rx_data, rx_data);
+			  printf("uart Rx :  0x%X \r\n",rx_data);
 
+			  cliMain();*/
+#if 0
 			  if(rx_data == '1')
 			  {
 				  uint8_t buf[32];
 
 				  printf("Read....\r\n");
-				  flashRead(0x08000000+(60*1024),buf,32);
+				  flashRead(0x08000000+(180*1024),buf,32);
 				  for(int i=0; i<32; i++)
 				  {
-					 printf("0x0%X : 0x%X\r\n",0x08000000+(60*1024)+i,buf[i]);
+					 //printf("0x0%X : 0x%X\r\n",0x08000000+(180*1024)+i,buf[i]);
 				  }
 			  }
 
@@ -216,7 +235,7 @@ int main(void)
 			  {
 				  printf("Erase.......");
 
-				  if(flashErase(0x08000000+(60*1024),32) == true){
+				  if(flashErase(0x08000000+(180*1024),32) == true){
 					  printf("Ok!!\r\n");
 				  }
 				  else
@@ -230,20 +249,25 @@ int main(void)
 				  uint8_t buf[32];
 				  for(int i=0; i<32; i++)
 				  {
-					 buf[i]=i;
+					 buf[i]=k;
+					 k++;
 				  }
 				  printf("Write...\r\n");
-				  if(flashWrite(0x08000000+(60*1024),32) == true){
+				  if(flashWrite(0x08000000+(180*1024),buf,32) == true){
 					  printf("Ok!!\r\n");
 				  }
 				  else
 				  {
 					  printf("Fail\r\n");
 				  }
-
 			  }
-		  }
+				if(rx_data == '4')
+				{
+				  ReadFlash();
+				}
 
+		  }
+#endif
 
 	  }
 
