@@ -82,7 +82,6 @@ bool qbufferRead(qbuffer_t *p_node, uint8_t *p_data, uint32_t length)
       break;
     }
   }
-
   return ret;
 }
 

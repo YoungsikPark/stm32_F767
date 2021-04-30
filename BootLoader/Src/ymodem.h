@@ -21,6 +21,9 @@
 
 #define YMODEM_BUF_LENGTH         (1024+5)
 
+#define FLASH_ADDR_FW 0x8010000
+#define FLASH_ADDR_START 0x8010000
+//#define FLASH_
 
 
 typedef enum

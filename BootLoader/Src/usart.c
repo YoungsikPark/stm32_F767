@@ -136,8 +136,8 @@ void MX_USART3_UART_Init(void)
   qbufferCreate(&qbuffer[2], &rx_buf[0], 256);
 
    __HAL_RCC_DMA1_CLK_ENABLE();
-   HAL_NVIC_SetPriority(USART3_IRQn, 0, 0);
-   HAL_NVIC_EnableIRQ(USART3_IRQn);
+   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
+   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
 
   if (HAL_UART_Init(&huart3) != HAL_OK)
   {

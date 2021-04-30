@@ -155,6 +155,9 @@ bool ymodemAck(ymodem_t *p_modem)
   return true;
 }
 
+/*********************************************************************/
+/* y modem 본격 적으로 실행이 되는 함수.
+/*********************************************************************/
 bool ymodemReceive(ymodem_t *p_modem)
 {
   bool ret = false;
@@ -172,13 +175,12 @@ bool ymodemReceive(ymodem_t *p_modem)
   {
     p_modem->rx_data = uartRead(p_modem->ch);
     update = true;
-
     //uartPrintf(_DEF_UART1, "Rx 0x%X, %d\n", p_modem->rx_data, p_modem->rx_packet.state);
-  }
+  } // 첫 패킷 들어오고 처리가 안될수도 있음 이건 어케할건지..?
 
   if (update == true && ymodemReceivePacket(&p_modem->rx_packet, p_modem->rx_data) == true)
   {
-    //uartPrintf(_DEF_UART1, "RxPacket 0x%X\n", p_modem->rx_packet.stx);
+ //   uartPrintf(_DEF_UART1, "RxPacket 0x%X\n", p_modem->rx_packet.stx);
 
     if (p_modem->state != YMODEM_STATE_WAIT_HEAD)
     {
@@ -190,7 +192,7 @@ bool ymodemReceive(ymodem_t *p_modem)
 
     switch(p_modem->state)
     {
-      case YMODEM_STATE_WAIT_HEAD:
+      case YMODEM_STATE_WAIT_HEAD: //첫번째 헤더 기다릴때
         if (p_modem->rx_packet.stx == YMODEM_EOT)
         {
           ymodemPutch(p_modem, YMODEM_NACK);
@@ -211,7 +213,7 @@ bool ymodemReceive(ymodem_t *p_modem)
         }
         break;
 
-      case YMODEM_STATE_WAIT_FIRST:
+      case YMODEM_STATE_WAIT_FIRST: //첫번째 데이터 기다릴때
         if (p_modem->rx_packet.stx == YMODEM_EOT)
         {
           ymodemPutch(p_modem, YMODEM_NACK);
@@ -237,7 +239,7 @@ bool ymodemReceive(ymodem_t *p_modem)
         }
         break;
 
-      case YMODEM_STATE_WAIT_DATA:
+      case YMODEM_STATE_WAIT_DATA: // 데이터 있을때
         if (p_modem->rx_packet.stx == YMODEM_EOT)
         {
           ymodemPutch(p_modem, YMODEM_NACK);
@@ -261,28 +263,27 @@ bool ymodemReceive(ymodem_t *p_modem)
         }
         break;
 
-      case YMODEM_STATE_WAIT_LAST:
-        ymodemPutch(p_modem, YMODEM_ACK);
-        ymodemPutch(p_modem, YMODEM_C);
+      case YMODEM_STATE_WAIT_LAST: //데이터 기다릴때
+        ymodemPutch(p_modem, YMODEM_ACK); // 0x06보내고
+        ymodemPutch(p_modem, YMODEM_C); // 대문자 C 보냄
         p_modem->state = YMODEM_STATE_WAIT_END;
         break;
 
       case YMODEM_STATE_WAIT_END:
-        ymodemPutch(p_modem, YMODEM_ACK);
+        ymodemPutch(p_modem, YMODEM_ACK); // 끝 신호 보냄
         p_modem->state = YMODEM_STATE_WAIT_HEAD;
-        p_modem->type = YMODEM_TYPE_END;
+        p_modem->type = YMODEM_TYPE_END; // 끝신호  들어오면
         ret = true;
         break;
 
-      case YMODEM_STATE_WAIT_CANCEL:
-        ymodemPutch(p_modem, YMODEM_ACK);
+      case YMODEM_STATE_WAIT_CANCEL:// 취소신호
+    	  ymodemPutch(p_modem, YMODEM_ACK); //
         p_modem->state = YMODEM_STATE_WAIT_HEAD;
         p_modem->type = YMODEM_TYPE_CANCEL;
         ret = true;
         break;
     }
   }
-  else
   {
     if (p_modem->rx_packet.state == YMODEM_PACKET_WAIT_FIRST)
     {
@@ -425,13 +426,26 @@ void cliYmodem(cli_args_t *args)
 {
   bool ret = false;
   ymodem_t ymodem;
-  bool keep_loop;
+  bool keep_loop ;
+  uint8_t err_code = 0;
+
+  uint32_t pre_time;
+  uint32_t addr_offset;
+  uint32_t addr;
+
   uint8_t log_ch = 1;
 
 
-  if (args->argc == 1 && args->isStr(0, "down"))
+
+  if (args->argc == 2 && args->isStr(0, "down"))
   {
+
+    addr_offset = args->getData(1);
+
     ymodemOpen(&ymodem, 2);
+
+    cliPrintf("download ...");
+    pre_time = millis();
 
     keep_loop = true;
 
@@ -439,15 +453,41 @@ void cliYmodem(cli_args_t *args)
     {
       if (ymodemReceive(&ymodem) == true)
       {
+          pre_time = millis();
         switch(ymodem.type)
         {
           case YMODEM_TYPE_START:
             uartPrintf(log_ch, "YMODEM_TYPE_START %s %d\n", ymodem.file_name, ymodem.file_length);
+         /*   if (flashErase(FLASH_ADDR_FW, ymodem.file_length) != true)
+			 {
+			   keep_loop = false;
+			   err_code = 1;
+			 }*/
+            /*while(1){
+            	ret = flashErase(addr_offset, ymodem.file_length);
+            	if(ret != HAL_OK){
+            	   err_code = 1;
+            	}
+            	else{
+               	   err_code = 0;
+            	   break;
+            	}
+			    if(millis()-pre_time >= 15*0000){
+			       break;
+				}
+			    uartPrintf(log_ch, "wait erase\r\n");
+			}
             break;
-
+*/
           case YMODEM_TYPE_DATA:
             uartPrintf(log_ch, "YMODEM_TYPE_DATA %d %d %%\n", ymodem.rx_packet.seq[0], ymodem.file_received*100 / ymodem.file_length);
-            break;
+		    //addr = addr_offset + ymodem.file_addr;
+		     if (flashWrite(FLASH_ADDR_FW + ymodem.file_addr, ymodem.file_buf, ymodem.file_buf_length) != true)
+		     {
+			   keep_loop = false;
+			   err_code = 2;
+		     }
+		    break;
 
           case YMODEM_TYPE_END:
             uartPrintf(log_ch, "YMODEM_TYPE_END \n");
@@ -456,23 +496,40 @@ void cliYmodem(cli_args_t *args)
 
           case YMODEM_TYPE_CANCEL:
             uartPrintf(log_ch, "YMODEM_TYPE_CANCEL \n");
+            err_code = 3;
             keep_loop = false;
             break;
 
           case YMODEM_TYPE_ERROR:
             uartPrintf(log_ch, "YMODEM_TYPE_ERROR \n");
+            err_code = 4;
             keep_loop = false;
             break;
         }
       }
+      	if (millis()-pre_time >= 15*1000)
+     	{
+     	  keep_loop = false;
+     	  err_code = 5;
+     	}
     }
-    ret = true;
-  }
 
+
+
+    if((ymodem.type == YMODEM_TYPE_END)||(err_code != false))
+    {
+     cliPrintf("Down OK\n");
+    }
+    else
+	{
+	 cliPrintf("Down Fail :%d \n",err_code);
+	}
+	ret = true;
+  }
 
   if (ret != true)
   {
-    cliPrintf("ymodem down\n");
+    cliPrintf("ymodem down [addr] \r\n");
   }
 }
 #endif

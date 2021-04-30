@@ -16,7 +16,7 @@
 
 #ifdef _USE_HW_FLASH
 #define DATA_32                 ((uint32_t)0x12345678)
-#define FLASH_SECTOR_MAX          8
+#define FLASH_SECTOR_MAX          11
 #define FLASH_USER_START_ADDR     0x08008000
 #define FLASH_USER_END_ADDR       0x081FFFFF
 
@@ -61,11 +61,12 @@ static bool flashInSector(uint16_t sector_num, uint32_t addr, uint32_t length);
 
 bool flashInit(void)
 {
+	/*
   for (int i=0; i<FLASH_SECTOR_MAX; i++)
   {
     flash_tbl[i].addr   = 0x8000000 + i*1024;
     flash_tbl[i].length = 1024;
-  }
+  }*/
 
   cliAdd("flash", cliFlash);
 
@@ -76,57 +77,36 @@ bool flashErase(uint32_t addr, uint32_t length)
 {
   bool ret = false;
   uint32_t page_error=0;
-
+  uint32_t end_addr=0;
   int16_t  start_sector_num = -1;
   uint32_t sector_count = 0;
 
   uint32_t FirstSector = 0, NbOfSectors = 0;
 
 
-#if 0
-  for (int i=0; i<FLASH_SECTOR_MAX; i++)
-  {
-    if (flashInSector(i, addr, length) == true)
-    {
-      if (start_sector_num < 0)
-      {
-        start_sector_num = i;
-      }
-      sector_count++;
-    }
-  }
-
-   FirstSector = GetSector(FLASH_USER_START_ADDR);
-   /* Get the number of sector to erase from 1st sector*/
-   NbOfSectors = GetSector(FLASH_USER_END_ADDR) - FirstSector + 1;
-   /* Fill EraseInit structure*/
-
-   EraseInitStruct.TypeErase     = FLASH_TYPEERASE_SECTORS;
-   EraseInitStruct.VoltageRange  = FLASH_VOLTAGE_RANGE_3;
-   EraseInitStruct.Sector        = FirstSector;
-   EraseInitStruct.NbSectors     = NbOfSectors;
-#endif
-
- // if (sector_count > 0)
-  //{
 
     ret = HAL_FLASH_Unlock();
     ret = HAL_FLASH_OB_Unlock();
     /* Get the Dual bank configuration status */
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR |
+                             FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_ERSERR);
+
     HAL_FLASHEx_OBGetConfig(&OBInit);
 
     if((OBInit.USERConfig & OB_NDBANK_SINGLE_BANK) == OB_NDBANK_DUAL_BANK)
     {
-  	  printf("Single Bank Flash init Ok\r\n");
+  	  printf("Dual Bank Flash init Ok\r\n");
     }
 
-    /* Get the number of sector to erase from 1st sector*/
+    end_addr = addr+length;
 
+    //printf("end_addr : %x\r\n",end_addr);
+    /* Get the number of sector to erase from 1st sector*/
     FirstSector = GetSector(addr);
     NbOfSectors = GetSector(addr) - FirstSector + 1;
 
-    printf("FirstSector : %d    ",FirstSector);
-    printf("NbOfSectors : %d\r\n",NbOfSectors);
+    //printf("FirstSector : %d\r\n",FirstSector);
+    //printf("NbofSector  : %d\r\n",NbOfSectors);
 
     init.TypeErase      = FLASH_TYPEERASE_SECTORS;
     init.VoltageRange   = FLASH_VOLTAGE_RANGE_3; // FLASH_BANK_1;
@@ -138,18 +118,7 @@ bool flashErase(uint32_t addr, uint32_t length)
     {
       ret = true;
     }
-/*
-    __HAL_FLASH_DATA_CACHE_DISABLE();
-    __HAL_FLASH_INSTRUCTION_CACHE_DISABLE();
-
-    __HAL_FLASH_DATA_CACHE_RESET();
-    __HAL_FLASH_INSTRUCTION_CACHE_RESET();
-
-    __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
-    __HAL_FLASH_DATA_CACHE_ENABLE();
-*/
     HAL_FLASH_Lock();
-//  }
 
   return ret;
 }
@@ -173,6 +142,8 @@ bool flashWrite(uint32_t addr, uint8_t *p_data, uint32_t length)
 
     data  = p_data[i+0] << 0;
     data |= p_data[i+1] << 8;
+
+    //printf("write data: %x\r\n",data);
 
     status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, addr + i, (uint64_t)data);
     if (status != HAL_OK)
@@ -323,8 +294,6 @@ bool flashInSector(uint16_t sector_num, uint32_t addr, uint32_t length)
   return ret;
 }
 
-
-
 static uint32_t GetSector(uint32_t Address)
 {
   uint32_t sector = 0;
@@ -434,7 +403,6 @@ static uint32_t GetSector(uint32_t Address)
 #endif /* DUAL_BANK */
   return sector;
 }
-
 
 
 

@@ -110,7 +110,8 @@ static bool     cliArgsIsStr(uint8_t index, char *p_str);
 
 void cliShowList(cli_args_t *args);
 void cliMemoryDump(cli_args_t *args);
-
+void cliMemoryWrite(cli_args_t *args);
+void cliMemoryDelete(cli_args_t *args);
 
 bool cliInit(void)
 {
@@ -133,7 +134,7 @@ bool cliInit(void)
 
   cliAdd("help", cliShowList);
   cliAdd("md"  , cliMemoryDump);
-//  cliAdd("down", cliYmodem);
+  cliAdd("mw8", cliMemoryWrite);
   cliOpen(2,115200);
 
   return true;
@@ -713,6 +714,118 @@ void cliShowList(cli_args_t *args)
 }
 
 void cliMemoryDump(cli_args_t *args)
+{
+  int idx, size = 16;
+  unsigned int *addr;
+  int idx1, i;
+  unsigned int *ascptr;
+  unsigned char asc[4];
+
+  int    argc = args->argc;
+  char **argv = args->argv;
+
+  if(args->argc < 1)
+  {
+    cliPrintf(">> md addr [size] \n");
+    return;
+  }
+
+  if(argc > 1)
+  {
+    size = (int)strtoul((const char * ) argv[1], (char **)NULL, (int) 0);
+  }
+  addr   = (unsigned int *)strtoul((const char * ) argv[0], (char **)NULL, (int) 0);
+  ascptr = (unsigned int *)addr;
+
+  for (idx = 0; idx<size; idx++)
+  {
+    if((idx%4) == 0)
+    {
+      printf("   0x%08X: ", (unsigned int)addr);
+    }
+    printf(" 0x%08X", *(addr));
+
+    if ((idx%4) == 3)
+    {
+      for (idx1= 0; idx1< 4; idx1++)
+      {
+        memcpy((char *)asc, (char *)ascptr, 4);
+		if(idx1 == 0)
+		{
+	       printf("  |");
+		}
+        for (i=0;i<4;i++)
+        {
+           if (asc[i] > 0x1f && asc[i] < 0x7f)
+          {
+            printf("%c", asc[i]);
+          }
+          else
+          {
+            printf(".");
+          }
+        }
+        ascptr+=1;
+      }
+      printf("|\r\n");
+    }
+    addr++;
+  }
+}
+
+
+/**********************************************************************/
+/*
+*	Function	: shell_mw8()
+*	Input Value :
+*		- none.
+*	Output Value:
+*		- none.
+*	Return Value:
+*		- none.
+*	Description :
+*		-
+*/
+
+void cliMemoryWrite(cli_args_t *args)
+{
+	unsigned int	*end_addr, pattern;
+	uint32_t	size,addr,data;
+//	unsigned int *addr;
+//	unsigned int *ascptr;
+
+	uint8_t ret;
+	int    argc = args->argc;
+
+    addr    = (uint32_t)args->getData(0);
+    data    = (uint32_t)args->getData(1);
+    size    = (uint32_t)args->getData(2);
+
+	if(argc < 1){
+		printf("mw8 addr data [size]\r\n");
+	}
+
+	end_addr = addr + size;
+
+	for( ; addr < end_addr; addr++)
+	{
+		ret = flashWrite(addr, (uint8_t *)&pattern, 2);
+	}
+
+	if(ret == 0)
+	{
+		printf("Write Success\r\n");
+	}
+	else
+	{
+		printf("Write Fail\r\n");
+	}
+
+	return(ret);
+}
+
+
+void cliMemoryDelete(cli_args_t *args)
 {
   int idx, size = 16;
   unsigned int *addr;
