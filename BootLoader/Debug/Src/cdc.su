@@ -1,0 +1,2 @@
+cdc.c:20:6:cdcInit	0	static
+cdc.c:30:6:cdcIsInit	0	static

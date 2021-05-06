@@ -21,6 +21,8 @@
 #include "usart.h"
 #include "qbuffer.h"
 #include "stm32f7xx_hal_def.h"
+#include "usbd_cdc_if.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -32,12 +34,21 @@ static bool is_open[4];
 
 static qbuffer_t qbuffer[4];
 static uint8_t rx_buf[256];
-//static uint8_t rx_data;
+static uint8_t rx_data;
 
 UART_HandleTypeDef huart3;
 DMA_HandleTypeDef hdma_usart3_rx;
 
 /* USART3 init function */
+
+bool uartInit(void)
+{
+  for (int i=0; i<2; i++)
+  {
+    is_open[i] = false;
+  }
+  return true;
+}
 
 uint32_t uartAvailable(uint8_t ch)
 {
@@ -46,7 +57,7 @@ uint32_t uartAvailable(uint8_t ch)
   switch(ch)
   {
     case 1:
- //     ret = cdcAvailable();
+      ret = cdcAvailable();
       break;
 
     case 2:
@@ -65,7 +76,7 @@ uint8_t uartRead(uint8_t ch)
   switch(ch)
   {
     case 1:
-  //    ret = cdcRead();
+      ret = cdcRead();
       break;
 
     case 2:
@@ -83,7 +94,7 @@ uint32_t uartWrite(uint8_t ch, uint8_t *p_data, uint32_t length)
   switch(ch)
   {
     case 1:
-    //  ret = cdcWrite(p_data, length);
+      ret = cdcWrite(p_data, length);
       break;
 
     case 2:
@@ -116,48 +127,63 @@ uint32_t uartPrintf(uint8_t ch, char *fmt, ...)
 
   return ret;
 }
-void MX_USART3_UART_Init(void)
+
+
+bool uartOpen(uint8_t ch, uint32_t baud)
 {
-  //bool ret = false;
+  bool ret = false;
 
-  huart3.Instance = USART3;
-  huart3.Init.BaudRate = 115200;
-  huart3.Init.WordLength = UART_WORDLENGTH_8B;
-  huart3.Init.StopBits = UART_STOPBITS_1;
-  huart3.Init.Parity = UART_PARITY_NONE;
-  huart3.Init.Mode = UART_MODE_TX_RX;
-  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
 
-  HAL_UART_DeInit(&huart3);
-
-  qbufferCreate(&qbuffer[2], &rx_buf[0], 256);
-
-   __HAL_RCC_DMA1_CLK_ENABLE();
-   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
-   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
-
-  if (HAL_UART_Init(&huart3) != HAL_OK)
+  switch(ch)
   {
-    Error_Handler();
-  }
-  else
-  {
-	 // ret = true;
-	  is_open[2]=true;
-	//if(HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1) != HAL_OK)
-	   if(HAL_UART_Receive_DMA(&huart3, (uint8_t *)&rx_buf[0], 256) != HAL_OK)
-	  {
-		  printf("HAL_ERROR\r\n");
-		 // ret = false;
-	  }
-		qbuffer[2].in  = qbuffer[2].len - hdma_usart3_rx.Instance->NDTR;
-		qbuffer[2].out = qbuffer[2].in;
-  }
+      case 1:
+		  is_open[ch] = true;
+		  ret = true;
+		  break;
+		 // cliOpen(1,51200);
 
-  cliInit();
+	  case 2:
+		  huart3.Instance = USART3;
+		  huart3.Init.BaudRate = 115200;
+		  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+		  huart3.Init.StopBits = UART_STOPBITS_1;
+		  huart3.Init.Parity = UART_PARITY_NONE;
+		  huart3.Init.Mode = UART_MODE_TX_RX;
+		  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+		  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+		  huart3.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+		  huart3.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+
+		  HAL_UART_DeInit(&huart3);
+
+		  qbufferCreate(&qbuffer[2], &rx_buf[0], 256);
+
+		   __HAL_RCC_DMA1_CLK_ENABLE();
+		   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
+		   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+
+		  if (HAL_UART_Init(&huart3) != HAL_OK)
+		  {
+			Error_Handler();
+		  }
+		  else
+		  {
+			  ret = true;
+			  is_open[ch]=true;
+			//if(HAL_UART_Receive_IT(&huart3, (uint8_t *)&rx_data, 1) != HAL_OK)
+			   if(HAL_UART_Receive_DMA(&huart3, (uint8_t *)&rx_buf[0], 256) != HAL_OK)
+			  {
+				  printf("HAL_ERROR\r\n");
+				  ret = false;
+			  }
+				qbuffer[ch].in  = qbuffer[2].len - hdma_usart3_rx.Instance->NDTR;
+				qbuffer[ch].out = qbuffer[2].in;
+		  }
+
+		 // cliOpen(2,115200);
+	break;
+	 }
+    return ret;
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)

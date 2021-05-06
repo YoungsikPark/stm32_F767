@@ -1,10 +1,9 @@
 ymodem.c:67:6:ymodemInit	8	static
 ymodem.c:76:6:ymodemOpen	24	static
-ymodem.c:96:6:ymodemPutch	24	static
-ymodem.c:105:6:ymodemGetFileInfo	32	static
-ymodem.c:140:6:ymodemAck	16	static
-ymodem.c:161:6:ymodemReceive	24	static
-ymodem.c:301:6:ymodemReceivePacket	24	static
-ymodem.c:385:10:crc_update	24	static
-ymodem.c:403:10:crc16	24	static
-ymodem.c:425:6:cliYmodem	1256	static
+ymodem.c:96:6:ymodemPutch	16	static
+ymodem.c:105:6:ymodemGetFileInfo	16	static
+ymodem.c:140:6:ymodemAck	8	static
+ymodem.c:385:10:crc_update	0	static
+ymodem.c:161:6:ymodemReceive	32	static
+ymodem.c:425:6:cliYmodem.part.0	1264	static
+ymodem.c:425:6:cliYmodem	8	static

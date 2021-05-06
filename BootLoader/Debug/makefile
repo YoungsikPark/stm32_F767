@@ -10,6 +10,10 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include Startup/subdir.mk
+-include Src/lib/cube_f767/USB_DEVICE/Target/subdir.mk
+-include Src/lib/cube_f767/USB_DEVICE/App/subdir.mk
+-include Src/lib/cube_f767/Middlewares/ST/STM32_USB_Device_Library/Core/Src/subdir.mk
+-include Src/lib/cube_f767/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/subdir.mk
 -include Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Src/subdir.mk
 -include Src/BSP/subdir.mk
 -include Src/subdir.mk

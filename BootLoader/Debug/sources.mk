@@ -23,5 +23,9 @@ SUBDIRS := \
 Src/BSP \
 Src \
 Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Src \
+Src/lib/cube_f767/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \
+Src/lib/cube_f767/Middlewares/ST/STM32_USB_Device_Library/Core/Src \
+Src/lib/cube_f767/USB_DEVICE/App \
+Src/lib/cube_f767/USB_DEVICE/Target \
 Startup \
 

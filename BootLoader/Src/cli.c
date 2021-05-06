@@ -131,9 +131,8 @@ bool cliInit(void)
 
   cliLineClean(&cli_node);
 
-
   cliAdd("help", cliShowList);
-  cliAdd("md"  , cliMemoryDump);
+  cliAdd("md8"  , cliMemoryDump);
   cliAdd("mw8", cliMemoryWrite);
   cliOpen(2,115200);
 
@@ -203,10 +202,11 @@ bool cliMain(void)
 {
   if (cli_node.is_open != true)
   {
+	printf("cli node is not open\r\n");
     return false;
   }
 
-  if (uartAvailable(2) > 0)
+  if (uartAvailable(cli_node.ch) > 0)
   {
     cliUpdate(&cli_node, uartRead(cli_node.ch));
   }

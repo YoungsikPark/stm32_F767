@@ -29,6 +29,9 @@ Src/BSP/stm32f7xx_it.o: ../Src/BSP/stm32f7xx_it.c \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pwr_ex.h \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h \
  C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h \
+ C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h \
+ C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h \
+ C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h \
  ../Src/BSP/stm32f7xx_it.h
 
 C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/main.h:
@@ -90,5 +93,11 @@ C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f76
 C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h:
 
 C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h:
+
+C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd.h:
+
+C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_ll_usb.h:
+
+C:/Users/YoungSik/STM32CubeIDE/workspace_1.6.0/stm32f767zi_boot/Src/lib/cube_f767/Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_pcd_ex.h:
 
 ../Src/BSP/stm32f7xx_it.h:

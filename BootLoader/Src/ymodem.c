@@ -481,7 +481,7 @@ void cliYmodem(cli_args_t *args)
 */
           case YMODEM_TYPE_DATA:
             uartPrintf(log_ch, "YMODEM_TYPE_DATA %d %d %%\n", ymodem.rx_packet.seq[0], ymodem.file_received*100 / ymodem.file_length);
-		    //addr = addr_offset + ymodem.file_addr;
+            uartPrintf(log_ch,"%x, %x ,%x\r\n",FLASH_ADDR_FW + ymodem.file_addr,ymodem.file_buf, ymodem.file_buf_length);
 		     if (flashWrite(FLASH_ADDR_FW + ymodem.file_addr, ymodem.file_buf, ymodem.file_buf_length) != true)
 		     {
 			   keep_loop = false;

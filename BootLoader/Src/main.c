@@ -47,7 +47,7 @@ void SystemClock_config(void);
 
 void MX_GPIO_Init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -88,6 +88,15 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PG14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
 }
 
 void SystemClock_Config(void)
@@ -137,8 +146,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3|RCC_PERIPHCLK_CLK48;
   PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -187,7 +197,11 @@ int main(void)
 
 	//SystemInit();
 	MX_GPIO_Init();
-	MX_USART3_UART_Init();
+
+	uartOpen(1,51200);
+	uartOpen(2,115200);
+	cliInit();
+	MX_USB_DEVICE_Init();
 	flashInit();
 	ymodemInit();
 	cliFlash();
@@ -197,13 +211,14 @@ int main(void)
 #endif //...? 확인 필요.
 */
 
-	printf("start MCU\r\n");
+	 printf("start MCU\r\n");
 	 pre_time = millis();
 
 	  while(1)
 	  {
 		  if(millis()-pre_time >= 500)
 		  {
+			  CDC_Transmit_FS(p_data, length);
 			  pre_time = millis();
 			  HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		  }
