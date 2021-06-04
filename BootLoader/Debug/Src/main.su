@@ -1,7 +1,9 @@
-main.c:32:5:__io_putchar	16	static
-main.c:48:6:MX_GPIO_Init	72	static
-main.c:102:6:SystemClock_Config	232	static,ignoring_inline_asm
-main.c:174:6:delay	0	static
-main.c:178:10:millis	0	static
-main.c:182:6:Error_Handler	0	static,ignoring_inline_asm
-main.c:188:5:main	16	static,ignoring_inline_asm
+main.c:36:5:__io_putchar	16	static
+main.c:50:6:MX_GPIO_Init	72	static
+main.c:104:6:SystemClock_Config	232	static,ignoring_inline_asm
+main.c:160:6:Main_Menu	0	static
+main.c:170:9:BootApplication	16	static,ignoring_inline_asm
+main.c:222:6:delay	0	static
+main.c:226:10:millis	0	static
+main.c:231:6:Error_Handler	0	static,ignoring_inline_asm
+main.c:237:5:main	16	static

@@ -57,6 +57,46 @@
 
 #ifdef _USE_HW_FLASH
 
+/* End of the Flash address */
+#define USER_FLASH_END_ADDRESS        0x08210000
+/* Define the user application size */
+#define USER_FLASH_SIZE   (USER_FLASH_END_ADDRESS - APPLICATION_ADDRESS + 1)
+
+/* Define the address from where user application will be loaded.
+   Note: the 1st sector 0x08000000-0x08003FFF is reserved for the IAP code */
+#define APPLICATION_ADDRESS   (uint32_t)0x08010000
+
+/* Define bitmap representing user flash area that could be write protected (check restricted to pages 8-39). */
+#define FLASH_SECTOR_TO_BE_PROTECTED (OB_WRP_SECTOR_0 | OB_WRP_SECTOR_1 | OB_WRP_SECTOR_2 | OB_WRP_SECTOR_3 |\
+									  OB_WRP_SECTOR_4 | OB_WRP_SECTOR_5 | OB_WRP_SECTOR_6 | OB_WRP_SECTOR_7)
+
+
+#define CRC_BLOCK_SIZE		1024
+#define CRC_BLOCK_COUNT		498
+
+typedef struct {
+	uint32_t	stack_pointer;
+	uint32_t	reset_vector;
+	uint32_t	version;			/* 옵션 */
+	uint32_t	revision;			/* 옵션 */
+	uint32_t	block_size;			/* 이미지 블록 사이즈 : 1024 */
+	uint32_t	block_count;		/* 이미지 블록 개수 */
+	uint16_t	crc_all_block;		/* 전체 이미지에 대한 CRC 값 */
+	uint16_t	crc_block[CRC_BLOCK_COUNT];		/* 1024 바이트 이미지 블록 각각에 대한 CRC 값 */
+	uint16_t	crc_header;			/* 헤더에 대한 CRC 값 */
+	} STImgHead;
+
+
+	/* Error code */
+	enum
+	{
+	  FLASHIF_OK = 0,
+	  FLASHIF_ERASEKO,
+	  FLASHIF_WRITINGCTRL_ERROR,
+	  FLASHIF_WRITING_ERROR
+	};
+
+uint32_t  FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data, uint32_t DataLength);
 
 extern bool flashInit(void);
 extern bool flashErase(uint32_t addr, uint32_t length);

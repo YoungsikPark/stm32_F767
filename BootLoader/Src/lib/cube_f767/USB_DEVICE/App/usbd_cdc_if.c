@@ -21,12 +21,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
 
 /* USER CODE BEGIN INCLUDE */
 
@@ -340,12 +334,25 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   /* 6      | bDataBits  |   1   | Number Data bits (5, 6, 7, 8 or 16).          */
   /*******************************************************************************/
     case CDC_SET_LINE_CODING:
+        LineCoding.bitrate   = (uint32_t)(pbuf[0]);
+        LineCoding.bitrate  |= (uint32_t)(pbuf[1]<<8);
+        LineCoding.bitrate  |= (uint32_t)(pbuf[2]<<16);
+        LineCoding.bitrate  |= (uint32_t)(pbuf[3]<<24);
+        LineCoding.format    = pbuf[4];
+        LineCoding.paritytype= pbuf[5];
+        LineCoding.datatype  = pbuf[6];
+      break;
 
-    break;
+      case CDC_GET_LINE_CODING:
+        pbuf[0] = (uint8_t)(LineCoding.bitrate);
+        pbuf[1] = (uint8_t)(LineCoding.bitrate>>8);
+        pbuf[2] = (uint8_t)(LineCoding.bitrate>>16);
+        pbuf[3] = (uint8_t)(LineCoding.bitrate>>24);
+        pbuf[4] = LineCoding.format;
+        pbuf[5] = LineCoding.paritytype;
+        pbuf[6] = LineCoding.datatype;
+      break;
 
-    case CDC_GET_LINE_CODING:
-
-    break;
 
     case CDC_SET_CONTROL_LINE_STATE:
 
@@ -380,32 +387,27 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
-  /* USER CODE BEGIN 6 */
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  for(int i =0; i<*Len;i++)
-  {
-	  cdcDataIn(Buf[i]);
-  }
-  uint32_t buf_len;
+	  /* USER CODE BEGIN 6 */
+	  for (int i=0; i<*Len; i++)
+	  {
+	    cdcDataIn(Buf[i]);
+	  }
 
+	  uint32_t buf_len;
 
-  buf_len = (rx_len - cdcAvailable()) - 1;
+	  buf_len = (rx_len - cdcAvailable()) - 1;
 
-  if(buf_len >= USB_FS_MAX_PACKET_SIZE)
-  {
-	  //다음데이터 송신 OK
-	  USBD_CDC_SetRxBuffer(&hUsbDeviceFS,&Buf[0]);
-	  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  }
-  else
-  {
-	  //버퍼가 꽉참.
-	  rx_full = true;
-  }
-
-  return (USBD_OK);
-  /* USER CODE END 6 */
+	  if (buf_len >= USB_FS_MAX_PACKET_SIZE)
+	  {
+	    USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+	    USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+	  }
+	  else
+	  {
+	    rx_full = true;
+	  }
+	  return (USBD_OK);
+	  /* USER CODE END 6 */
 }
 
 /**
@@ -455,7 +457,6 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
   /* USER CODE END 13 */
   return result;
 }
-
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

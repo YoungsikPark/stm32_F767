@@ -102,6 +102,7 @@ EndBSPDependencies */
 static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_CDC_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
+
 static uint8_t USBD_CDC_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_CDC_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum);
 static uint8_t USBD_CDC_EP0_RxReady(USBD_HandleTypeDef *pdev);
@@ -111,9 +112,6 @@ static uint8_t *USBD_CDC_GetHSCfgDesc(uint16_t *length);
 static uint8_t *USBD_CDC_GetOtherSpeedCfgDesc(uint16_t *length);
 static uint8_t *USBD_CDC_GetOtherSpeedCfgDesc(uint16_t *length);
 uint8_t *USBD_CDC_GetDeviceQualifierDescriptor(uint16_t *length);
-
-extern uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev);
-
 
 /* USB Standard Device Descriptor */
 __ALIGN_BEGIN static uint8_t USBD_CDC_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_DESC] __ALIGN_END =
@@ -137,7 +135,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_
 /** @defgroup USBD_CDC_Private_Variables
   * @{
   */
-//extern uint8_t USBD_CDC_SOF(*SOF)(struct _USBD_HandleTypeDef *pdev);
+extern uint8_t USBD_CDC_SOF(struct _USBD_HandleTypeDef *pdev);
 
 /* CDC interface class callbacks structure */
 USBD_ClassTypeDef  USBD_CDC =

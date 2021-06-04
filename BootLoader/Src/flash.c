@@ -16,8 +16,8 @@
 
 #ifdef _USE_HW_FLASH
 #define DATA_32                 ((uint32_t)0x12345678)
-#define FLASH_SECTOR_MAX          11
-#define FLASH_USER_START_ADDR     0x08008000
+#define FLASH_SECTOR_MAX          12
+#define FLASH_USER_START_ADDR     0x08010000
 #define FLASH_USER_END_ADDR       0x081FFFFF
 
 FLASH_OBProgramInitTypeDef    OBInit;
@@ -42,18 +42,22 @@ typedef struct
 } flash_tbl_t;
 
 
-static flash_tbl_t flash_tbl[FLASH_SECTOR_MAX];
- /*{
-        {0x8000000,  16*1024},
-        {0x8004000,  16*1024},
-        {0x8008000,  16*1024},
-        {0x800C000,  16*1024},
-        {0x8010000,  64*1024},
+static flash_tbl_t flash_tbl[FLASH_SECTOR_MAX]=
+{
+        {0x8000000,  32*1024},
+        {0x8008000,  32*1024},
+        {0x8010000,  32*1024},
+        {0x8018000,  32*1024},
         {0x8020000, 128*1024},
-        {0x8040000, 128*1024},
-        {0x8060000, 128*1024},
-    };
-*/
+        {0x8040000, 256*1024},
+        {0x8080000, 256*1024},
+    	{0x80C0000, 256*1024},
+		{0x8100000, 256*1024},
+		{0x8140000, 256*1024},
+		{0x8180000, 256*1024},
+		{0x81C0000, 256*1024},
+};
+
 
 static bool flashInSector(uint16_t sector_num, uint32_t addr, uint32_t length);
 
@@ -68,7 +72,7 @@ bool flashInit(void)
     flash_tbl[i].length = 1024;
   }*/
 
-  cliAdd("flash", cliFlash);
+  //cliAdd("flash", cliFlash);
 
   return true;
 }
@@ -83,30 +87,19 @@ bool flashErase(uint32_t addr, uint32_t length)
 
   uint32_t FirstSector = 0, NbOfSectors = 0;
 
-
-
     ret = HAL_FLASH_Unlock();
-    ret = HAL_FLASH_OB_Unlock();
+//    ret = HAL_FLASH_OB_Unlock();
     /* Get the Dual bank configuration status */
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR |
                              FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_ERSERR);
 
-    HAL_FLASHEx_OBGetConfig(&OBInit);
-
-    if((OBInit.USERConfig & OB_NDBANK_SINGLE_BANK) == OB_NDBANK_DUAL_BANK)
-    {
-  	  printf("Dual Bank Flash init Ok\r\n");
-    }
+//    HAL_FLASHEx_OBGetConfig(&OBInit);
 
     end_addr = addr+length;
 
-    //printf("end_addr : %x\r\n",end_addr);
     /* Get the number of sector to erase from 1st sector*/
     FirstSector = GetSector(addr);
     NbOfSectors = GetSector(addr) - FirstSector + 1;
-
-    //printf("FirstSector : %d\r\n",FirstSector);
-    //printf("NbofSector  : %d\r\n",NbOfSectors);
 
     init.TypeErase      = FLASH_TYPEERASE_SECTORS;
     init.VoltageRange   = FLASH_VOLTAGE_RANGE_3; // FLASH_BANK_1;
@@ -127,25 +120,22 @@ bool flashWrite(uint32_t addr, uint8_t *p_data, uint32_t length)
 {
   bool ret = true;
   HAL_StatusTypeDef status;
-
-
-  if (addr%2 != 0)
+/*
+  if(addr%2 != 0)
   {
-    return false;
+	  return false;
   }
-
+*/
   HAL_FLASH_Unlock();
 
-  for (int i=0; i<length; i+=2)
+  for (int i=0; i<length; i+=1) //i+2
   {
     uint16_t data;
 
     data  = p_data[i+0] << 0;
-    data |= p_data[i+1] << 8;
+    //data |= p_data[i+1] << 8;
 
-    //printf("write data: %x\r\n",data);
-
-    status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, addr + i, (uint64_t)data);
+    status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, addr + i, (uint64_t)data);
     if (status != HAL_OK)
     {
       ret = false;
@@ -156,6 +146,36 @@ bool flashWrite(uint32_t addr, uint8_t *p_data, uint32_t length)
   HAL_FLASH_Lock();
 
   return ret;
+}
+
+
+uint32_t FLASH_If_Write(uint32_t FlashAddress, uint32_t* Data ,uint32_t DataLength)
+{
+  uint32_t i = 0;
+
+  for (i = 0; (i < DataLength) && (FlashAddress <= (USER_FLASH_END_ADDRESS-4)); i++)
+  {
+    /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
+       be done by word */
+    if (HAL_FLASH_Program(TYPEPROGRAM_WORD, FlashAddress, *(uint32_t*)(Data+i)) == HAL_OK)
+    {
+     /* Check the written value */
+      if (*(uint32_t*)FlashAddress != *(uint32_t*)(Data+i))
+      {
+        /* Flash content doesn't match SRAM content */
+        return(FLASHIF_WRITINGCTRL_ERROR);
+      }
+      /* Increment FLASH destination address */
+      FlashAddress += 4;
+    }
+    else
+    {
+      /* Error occurred while writing data in Flash memory */
+      return (FLASHIF_WRITING_ERROR);
+    }
+  }
+
+  return (FLASHIF_OK);
 }
 
 bool flashRead(uint32_t addr, uint8_t *p_data, uint32_t length)
@@ -483,5 +503,50 @@ void cliFlash(cli_args_t *args)
     cliPrintf("flash erase addr length\r\n");
     cliPrintf("flash write addr data\r\n");
   }
+}
+
+
+int32_t DiagFlash_CheckImage(const uint32_t base)
+{
+	int32_t		i, ret = 0;
+	int32_t		crc_head, crc_block, crc_all_block;
+	uint32_t	addr;
+	STImgHead	*pHead;
+
+	pHead = (STImgHead *)base;
+
+	crc_head = make_crc16(0u, (uint8_t *)pHead, sizeof(STImgHead) - sizeof(uint16_t));
+	if((crc_head < 0) || ((uint16_t)crc_head != pHead->crc_header))
+	{
+		ret = -1;
+	}
+
+	if((ret == 0) && (pHead->block_count > CRC_BLOCK_COUNT))
+	{
+		ret = -1;
+	}
+
+	crc_all_block = 0;
+	if(ret == 0)
+	{
+		for(i = 0; i < pHead->block_count; i++)
+		{
+			addr = base + sizeof(STImgHead) + (i * CRC_BLOCK_SIZE);
+			crc_block = make_crc16(0, (uint8_t *)addr, CRC_BLOCK_SIZE);
+			crc_all_block = make_crc16(crc_all_block, (uint8_t *)addr, CRC_BLOCK_SIZE);
+			if((crc_all_block < 0) || (crc_block < 0) || ((uint16_t)crc_block != pHead->crc_block[i]))
+			{
+				ret = -1;
+				break;
+			}
+		}
+
+		if((crc_all_block < 0) || ((uint16_t)crc_all_block != pHead->crc_all_block))
+		{
+			ret = -1;
+		}
+	}
+
+	return(ret);
 }
 #endif

@@ -140,7 +140,6 @@ bool uartOpen(uint8_t ch, uint32_t baud)
 		  is_open[ch] = true;
 		  ret = true;
 		  break;
-		 // cliOpen(1,51200);
 
 	  case 2:
 		  huart3.Instance = USART3;
@@ -180,7 +179,6 @@ bool uartOpen(uint8_t ch, uint32_t baud)
 				qbuffer[ch].out = qbuffer[2].in;
 		  }
 
-		 // cliOpen(2,115200);
 	break;
 	 }
     return ret;

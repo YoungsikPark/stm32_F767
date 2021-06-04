@@ -24,10 +24,14 @@
 #include "usart.h"
 #include "core_cm7.h"
 #include "ymodem.h"
-//#include "gpio.h"
-
+#include "flash.h"
 
 UART_HandleTypeDef huart3;
+
+
+static void CPU_CACHE_Enable(void);
+void SystemClock_config(void);
+
 
 int __io_putchar(int ch)
 {
@@ -41,9 +45,7 @@ int _write(int file,uint8_t*ptr,int len)
   return len;
 }
 */
-static void CPU_CACHE_Enable(void);
 
-void SystemClock_config(void);
 
 void MX_GPIO_Init(void)
 {
@@ -101,58 +103,163 @@ void MX_GPIO_Init(void)
 
 void SystemClock_Config(void)
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-  /** Configure LSE Drive Capability
-  */
-  HAL_PWR_EnableBkUpAccess();
-  /** Configure the main internal regulator output voltage
-  */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 216;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 9;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Activate the Over-Drive mode
-  */
-  if (HAL_PWREx_EnableOverDrive() != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+   /** Configure LSE Drive Capability
+   */
+   HAL_PWR_EnableBkUpAccess();
+   /** Configure the main internal regulator output voltage
+   */
+   __HAL_RCC_PWR_CLK_ENABLE();
+   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+   /** Initializes the RCC Oscillators according to the specified parameters
+   * in the RCC_OscInitTypeDef structure.
+   */
+   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+   RCC_OscInitStruct.PLL.PLLM = 4;
+   RCC_OscInitStruct.PLL.PLLN = 216;
+   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+   RCC_OscInitStruct.PLL.PLLQ = 9;
+   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+   {
+	 Error_Handler();
+   }
+   /** Activate the Over-Drive mode
+   */
+   if (HAL_PWREx_EnableOverDrive() != HAL_OK)
+   {
+	 Error_Handler();
+   }
+   /** Initializes the CPU, AHB and APB buses clocks
+   */
+   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+							   |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3|RCC_PERIPHCLK_CLK48;
-  PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
-  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
+   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
+   {
+	 Error_Handler();
+   }
+   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3|RCC_PERIPHCLK_CLK48;
+   PeriphClkInitStruct.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLL;
+   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+   {
+	 Error_Handler();
+   }
+}
+
+void Main_Menu(void)
+{
+	 printf("\r\n==========================================================");
+	 printf("\r\n=    Intercon systems STM32F7XX Bootloader  ");
+	 printf("\r\n     (Compiled: %s %s) --\r\n", __DATE__, __TIME__);
+	 printf("\r\n==========================================================\r\n");
+
+	 CPU (Embedded Processor):   Freescale i.MX6SX rev1.3 at 792 MHz
+	 CPU Temperature 43 C
+	 Embedded Processor          Cortex-M3.
+	 Architecture identifier     AT91SAM3UExx Series.
+	 Board: MX6SX SABRE SDB
+	 Reset cause: POR
+	 Nonvolatile program memory type           Embedded Flash Memory.
+	 Nonvolatile program memory size           256K bytes.
+	 Second nonvolatile program memory size    None.
+	 Internal SRAM size   :  1 GiB
+	 PMIC:  PFUZE100 ID=0x11
+	 SF: Detected N25Q256 with page size 256 Bytes, erase size 4 KiB, total 32 MiB
+	 In:    serial
+	 Out:   serial
+	 Err:   serial
+	 Net:   Phy 1 not found
+	 Normal Boot
+	 Extended chip ID is not existed.
+	 Hit enter key to stop autoboot:  0
+
+}
+#if 0
+void check_image(void)
+{
+	printf("\r\n\r\n");
+
+	printf("Checking Bootloader...");
+	ret = DiagFlash_CheckImage(0x8010000);
+	if(ret != 0)
+	{
+		printf("FAIL\r\n");
+/*		result = -1;*/		/* TODO : Application 이미지만 정상이면 부팅 가능.. ?? */
+	}
+	else
+	{
+		printf("OK\r\n\r\n");
+		printf("[ Bootloader Information ]\r\n");
+		PrintImageStat(0x8010000);
+	}
+
+	printf("\r\n");
+
+	printf("Checking Application...");
+	ret = DiagFlash_CheckImage(CONFIG_APP_BASE);
+	if(ret != 0)
+	{
+		printf("FAIL\r\n");
+		result = -1;
+	}
+	else
+	{
+		printf("OK\r\n");
+		printf("[ Application Information ]\r\n\r\n");
+		PrintImageStat(CONFIG_APP_BASE);
+	}
+
+	printf("\r\n");
+
+	return(result);
+}
+#endif
+
+int32_t BootApplication(void)
+{
+	//if(DiagFlash_CheckImage(0x8010000) == 0)
+	//{
+	uint32_t JumpAddress;
+
+	 	JumpAddress = *(__IO uint32_t*) (0x8010000+4);
+		printf("\r\nBooting at 0x%08X...\r\n\r\n", (void*)JumpAddress);
+
+//		  USBD_DeInit();
+		  HAL_RCC_DeInit();
+
+		  // Disable Interrupts
+		  //
+		  for (int i=0; i<8; i++)
+		  {
+			NVIC->ICER[i] = 0xFFFFFFFF;
+			__DSB();
+			__ISB();
+		  }
+		  SysTick->CTRL = 0;
+
+		void (**jump_func)(void) = (void (**)(void))(0x8010000 + 4);
+
+		(*jump_func)();
+		/* Initialize user application's Stack Pointer */
+		//JumpToApplication();
+		return(0);
+/*	}
+	else
+	{
+		printf("\r\nCannot boot at 0x%08X, image has been corrupted\r\n\r\n", (void*)JumpAddress);
+		return(-1);
+	}*/
 }
 
 /* USER CODE BEGIN 4 */
@@ -179,6 +286,7 @@ uint32_t millis(void)
 {
 	return HAL_GetTick();
 }
+
 void Error_Handler(void)
 {
   /* User can add his own implementation to report the HAL error return state */
@@ -190,22 +298,29 @@ int main(void)
 	uint32_t pre_time;
 	uint32_t k=16;
 
-	CPU_CACHE_Enable();
+//	CPU_CACHE_Enable();
+
 
 	HAL_Init();
 	SystemClock_Config();
 
 	//SystemInit();
 	MX_GPIO_Init();
+	cdcInit();
+	cliInit();
+	MX_USB_DEVICE_Init();
 
 	uartOpen(1,51200);
 	uartOpen(2,115200);
-	cliInit();
-	MX_USB_DEVICE_Init();
+
+	//cliOpen(1,51200);
+
 	flashInit();
 	ymodemInit();
 	cliFlash();
-/*
+
+
+	/*
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif //...? 확인 필요.
@@ -213,16 +328,17 @@ int main(void)
 
 	 printf("start MCU\r\n");
 	 pre_time = millis();
+	 printf("\r\n\r\n-- # booting (Compiled: %s %s) --\r\n", __DATE__, __TIME__);
+     Main_Menu();
 
 	  while(1)
 	  {
 		  if(millis()-pre_time >= 500)
 		  {
-			  CDC_Transmit_FS(p_data, length);
 			  pre_time = millis();
 			  HAL_GPIO_TogglePin(GPIOB, LD1_Pin);
 		  }
-
+//		  BootApplication();
 		  cliMain();
 
 		  /*

@@ -21,7 +21,10 @@ void SystemClock_config(void);
 extern void delay(uint32_t ms);
 extern uint32_t millis(void);
 void MX_GPIO_Init(void);
+extern int32_t BootApplication(void);
 
+
+typedef  void (*pFunction)(void);
 
 #define USER_Btn_Pin GPIO_PIN_13
 #define USER_Btn_GPIO_Port GPIOC

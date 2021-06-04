@@ -9,6 +9,9 @@
 
 #include "cli.h"
 #include "usart.h"
+#include "core_cm7.h"
+#include "main.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -112,6 +115,7 @@ void cliShowList(cli_args_t *args);
 void cliMemoryDump(cli_args_t *args);
 void cliMemoryWrite(cli_args_t *args);
 void cliMemoryDelete(cli_args_t *args);
+void cliReset(cli_args_t *args);
 
 bool cliInit(void)
 {
@@ -134,6 +138,8 @@ bool cliInit(void)
   cliAdd("help", cliShowList);
   cliAdd("md8"  , cliMemoryDump);
   cliAdd("mw8", cliMemoryWrite);
+  cliAdd("reset",cliReset);
+  cliAdd("boot",BootApplication);
   cliOpen(2,115200);
 
   return true;
@@ -884,5 +890,17 @@ void cliMemoryDelete(cli_args_t *args)
     }
     addr++;
   }
+}
+
+
+
+void cliReset(cli_args_t *args)
+{
+	HAL_Delay(500);
+	printf("MCU reset by software wait......\r\n\r\n\r\n");
+//깜빡깜빡 구현하기
+	HAL_Delay(500);
+
+	NVIC_SystemReset();
 }
 #endif
